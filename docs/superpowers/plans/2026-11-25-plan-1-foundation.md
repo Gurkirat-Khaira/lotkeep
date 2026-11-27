@@ -238,11 +238,11 @@ it("postgres is not exposed beyond localhost", () => { expect(composePorts("post
     - `formatters.log` applies `redactDeep`, because pino's `redact` paths can't match key suffixes like `*_ct`.
   - `newId()` (UUIDv7) moves here from `packages/db`.
 
-- [ ] **Step 1: Write failing tests**: `config rejects MASTER_KEY of wrong length`; `config error lists keys without values`; `FixedClock advances`; `percentOfCents rounds half-up (150 bp of 1333333 → 20000)`; `cents rejects 1.5`; `dollarsToCents parses commas`; `formatUSD es uses es-US format`; `logger redacts pii keys` (log `{ ssn: "123-45-6789", nested: { dl_ct: "x" } }` → output contains neither); `isSensitiveKey allows deadline and middleName`; `isSensitiveKey blocks ssn, dlNumber, dob, ssn_ct, accessToken`; `fakeVin passes check digit and contains FAKE`.
-- [ ] **Step 2: Run** `pnpm --filter @dms/core --filter @dms/config test`. Expected: FAIL.
-- [ ] **Step 3: Implement**. No dependencies besides `zod`, `pino` and `uuid`.
-- [ ] **Step 4: Run**. Expected: PASS.
-- [ ] **Step 5: Commit** `git commit -m "feat(core): config, clock, money, errors, logging and fakes"`
+- [x] **Step 1: Write failing tests**: `config rejects MASTER_KEY of wrong length`; `config error lists keys without values`; `FixedClock advances`; `percentOfCents rounds half-up (150 bp of 1333333 → 20000)`; `cents rejects 1.5`; `dollarsToCents parses commas`; `formatUSD es uses es-US format`; `logger redacts pii keys` (log `{ ssn: "123-45-6789", nested: { dl_ct: "x" } }` → output contains neither); `isSensitiveKey allows deadline and middleName`; `isSensitiveKey blocks ssn, dlNumber, dob, ssn_ct, accessToken`; `fakeVin passes check digit and contains FAKE`.
+- [x] **Step 2: Run** `pnpm --filter @dms/core --filter @dms/config test`. Expected: FAIL.
+- [x] **Step 3: Implement**. No dependencies besides `zod`, `pino` and `uuid`.
+- [x] **Step 4: Run**. Expected: PASS.
+- [x] **Step 5: Commit** `git commit -m "feat(core): config, clock, money, errors, logging and fakes"`
 
 ### Task 4: Dealers, locations, memberships with forced RLS
 
