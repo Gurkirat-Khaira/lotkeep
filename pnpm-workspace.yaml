@@ -4,3 +4,4 @@ packages:
   - "scripts"
 allowBuilds:
   esbuild: false
+minimumReleaseAge: 1440 # minutes: never install a version published less than a day ago (ADR 0001)
