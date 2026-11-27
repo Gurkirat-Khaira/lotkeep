@@ -34,6 +34,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
+      # Throwaway random secrets for this run only, then Postgres + MinIO for the DB tests.
+      - name: Start local services
+        run: scripts/gen-env.sh && pnpm dev:up
       - run: pnpm test
       - run: pnpm build
       # The bundle size budget step (pnpm size) is added in Plan 1 Task 13.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # First-time setup: checks the required tools, installs the git hooks and dependencies.
-# Safe to re-run. (Plan 1 Task 2 adds local secret generation here.)
+# Safe to re-run. Creates the local env file with random secrets if it is missing (never overwrites it).
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -56,8 +56,11 @@ git config core.hooksPath scripts/git-hooks
 chmod +x scripts/git-hooks/*
 ok "core.hooksPath = scripts/git-hooks"
 
+echo "Local settings…"
+scripts/gen-env.sh
+
 echo "Installing dependencies…"
 pnpm install --frozen-lockfile
 ok "dependencies installed"
 
-echo "Done. Next: pnpm verify"
+echo "Done. Next: pnpm dev:up, then pnpm verify"

@@ -76,6 +76,16 @@ describe("repo hygiene", () => {
     expect(gitTracked("*.env")).toEqual([]);
   });
 
+  it("env example holds placeholders, never secret values", () => {
+    const secretKeys = /PASSWORD|SECRET|MASTER_KEY|TOKEN/;
+    for (const line of read(".env.example").split("\n")) {
+      if (line.startsWith("#") || !line.includes("=")) continue;
+      const [key = "", value = ""] = line.split(/=(.*)/s);
+      if (secretKeys.test(key)) expect(value, key).toBe("");
+      if (key.startsWith("DATABASE_URL")) expect(value, key).toMatch(/:__[A-Z_]+__@/);
+    }
+  });
+
   it("brand SVGs carry no embedded metadata", () => {
     for (const f of glob("brand/assets/*.svg")) {
       expect(read(f), f).not.toMatch(/<metadata|c2pa/i);

@@ -1,0 +1,21 @@
+{
+  "name": "@dms/db",
+  "version": "0.0.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run --exclude '**/*.slow.test.ts'",
+    "test:slow": "vitest run --passWithNoTests .slow.test.",
+    "typecheck": "tsc -p tsconfig.json",
+    "db:migrate": "echo 'db:migrate: no migrations yet (Drizzle config arrives in Plan 1 Task 4)'",
+    "db:studio": "echo 'db:studio: available from Plan 1 Task 4 (drizzle-kit studio)'"
+  },
+  "dependencies": {
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@types/pg": "8.23.1",
+    "yaml": "2.9.1"
+  }
+}
