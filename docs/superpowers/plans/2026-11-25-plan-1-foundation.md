@@ -326,11 +326,11 @@ it("suite variants normalize equal", () => {
   - `blindIndex(key: Uint8Array, value: string): string` (HMAC-SHA256 hex; strips spaces and dashes, uppercases).
   - `rotateMasterKey(oldProvider, newProvider)` (rewraps dealer keys only; data is untouched).
 
-- [ ] **Step 1: Write failing tests**: `round-trips`; `AAD mismatch throws` (rowId changed); `same plaintext encrypts differently`; `tampered tag throws`; `shredded key decrypts to Destroyed`; `blind index stable per dealer ("123-45-6789" == "123 45 6789") and differs across dealers`; `master key rotation keeps data readable`; `key bytes are zeroed after use where possible`.
-- [ ] **Step 2: Run** `pnpm --filter @dms/crypto test`. Expected: FAIL.
-- [ ] **Step 3: Implement** with Node `crypto` `aes-256-gcm` and a 12-byte random IV. The dealer key is wrapped by the master key; customer and blind-index keys are wrapped by the dealer key. Register `data_keys` in the leak suite.
-- [ ] **Step 4: Run**. Expected: PASS; coverage for `packages/crypto` ≥ 95%.
-- [ ] **Step 5: Commit** `git commit -m "feat(crypto): envelope field encryption, per-customer keys, blind index"`
+- [x] **Step 1: Write failing tests**: `round-trips`; `AAD mismatch throws` (rowId changed); `same plaintext encrypts differently`; `tampered tag throws`; `shredded key decrypts to Destroyed`; `blind index stable per dealer ("123-45-6789" == "123 45 6789") and differs across dealers`; `master key rotation keeps data readable`; `key bytes are zeroed after use where possible`.
+- [x] **Step 2: Run** `pnpm --filter @dms/crypto test`. Expected: FAIL.
+- [x] **Step 3: Implement** with Node `crypto` `aes-256-gcm` and a 12-byte random IV. The dealer key is wrapped by the master key; customer and blind-index keys are wrapped by the dealer key. Register `data_keys` in the leak suite.
+- [x] **Step 4: Run**. Expected: PASS; coverage for `packages/crypto` ≥ 95%.
+- [x] **Step 5: Commit** `git commit -m "feat(crypto): envelope field encryption, per-customer keys, blind index"`
 
 ### Task 7: Hash-chained audit log
 

@@ -103,22 +103,25 @@ describe("dealer leak suite", () => {
       });
 
       it("update and delete targeting B affect 0 rows (or are not granted at all)", async () => {
-        const upd = withDealer(A, (tx) =>
-          tx.execute(
-            sql`update ${qualified(table)} set dealer_id = dealer_id where dealer_id = ${B}`,
-          ),
-        );
-        const del = withDealer(A, (tx) =>
-          tx.execute(sql`delete from ${qualified(table)} where dealer_id = ${B}`),
-        );
+        // Lazy, so a denied statement is only run (and rejected) when the test awaits it.
+        const upd = () =>
+          withDealer(A, (tx) =>
+            tx.execute(
+              sql`update ${qualified(table)} set dealer_id = dealer_id where dealer_id = ${B}`,
+            ),
+          );
+        const del = () =>
+          withDealer(A, (tx) =>
+            tx.execute(sql`delete from ${qualified(table)} where dealer_id = ${B}`),
+          );
         for (const [op, run] of [
           ["UPDATE", upd],
           ["DELETE", del],
         ] as const) {
           if (await granted(table, op)) {
-            expect((await run).rowCount, op).toBe(0);
+            expect((await run()).rowCount, op).toBe(0);
           } else {
-            const e = await rejection(run); // append-only tables: denied outright, not by RLS
+            const e = await rejection(run()); // append-only tables: denied outright, not by RLS
             expect((e as DbError).sqlState, op).toBe("42501");
             expect((e as DbError).rlsViolation, op).toBe(false);
           }

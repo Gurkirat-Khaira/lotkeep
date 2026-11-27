@@ -1,0 +1,24 @@
+{
+  "name": "@dms/crypto",
+  "version": "0.0.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run --coverage --exclude '**/*.slow.test.ts'",
+    "test:slow": "vitest run --passWithNoTests .slow.test.",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@dms/config": "workspace:*",
+    "@dms/core": "workspace:*",
+    "@dms/db": "workspace:*",
+    "drizzle-orm": "0.45.4"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "5.1.2"
+  }
+}

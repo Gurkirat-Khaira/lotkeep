@@ -22,6 +22,27 @@
       "when": 1795759379709,
       "tag": "0002_tenancy_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795761495890,
+      "tag": "0003_keys",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795761837425,
+      "tag": "0004_data_keys_guard",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795762362868,
+      "tag": "0005_data_keys_guard_v2",
+      "breakpoints": true
     }
   ]
 }

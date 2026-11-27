@@ -9,6 +9,7 @@ import {
   glob,
   lines,
   read,
+  repoFiles,
   settings,
   size,
 } from "./helpers";
@@ -84,6 +85,17 @@ describe("repo hygiene", () => {
       if (secretKeys.test(key)) expect(value, key).toBe("");
       if (key.startsWith("DATABASE_URL")) expect(value, key).toMatch(/:__[A-Z_]+__@/);
     }
+  });
+
+  it("@dms/db/testing (owner-role test helpers) is imported only by tests", () => {
+    const offenders = repoFiles().filter(
+      (f) =>
+        /\.(m?[jt]sx?)$/.test(f) &&
+        !/(^|\/)test\//.test(f) &&
+        !/vitest\.config\.ts$/.test(f) &&
+        read(f).includes("@dms/db/testing"),
+    );
+    expect(offenders).toEqual([]);
   });
 
   it("brand SVGs carry no embedded metadata", () => {
