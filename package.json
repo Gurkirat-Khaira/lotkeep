@@ -16,7 +16,12 @@
     "lint:fix": "biome check --write .",
     "typecheck": "turbo run typecheck",
     "verify": "pnpm lint && pnpm typecheck && pnpm test",
-    "brand:sync": "tsx packages/brand/scripts/sync.ts && pnpm --filter @dms/scripts test repo-hygiene"
+    "brand:sync": "tsx packages/brand/scripts/sync.ts && pnpm --filter @dms/scripts test repo-hygiene",
+    "dev:up": "scripts/dev.sh up",
+    "dev:down": "scripts/dev.sh down",
+    "dev:reset": "scripts/dev.sh reset",
+    "db:migrate": "pnpm --filter @dms/db db:migrate",
+    "db:studio": "pnpm --filter @dms/db db:studio"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.9",

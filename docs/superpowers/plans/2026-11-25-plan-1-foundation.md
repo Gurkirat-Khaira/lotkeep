@@ -197,7 +197,7 @@ it("brand SVGs carry no embedded metadata", () => { for (const f of glob("brand/
   - `DMS_LOG_LEVEL`
 - Produces scripts: `pnpm dev:up`, `pnpm dev:down`, `pnpm dev:reset` (drops volumes after a confirmation prompt), `pnpm db:migrate`, `pnpm db:studio`.
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 ```ts
 it("app role cannot bypass RLS", async () => {
   const r = await appSql`select rolbypassrls, rolsuper from pg_roles where rolname = current_user`;
@@ -206,15 +206,15 @@ it("app role cannot bypass RLS", async () => {
 it("app role has statement timeout", async () => { expect((await appSql`show statement_timeout`)[0].statement_timeout).toBe("15s"); });
 it("postgres is not exposed beyond localhost", () => { expect(composePorts("postgres").every((p) => p.startsWith("127.0.0.1:"))).toBe(true); });
 ```
-- [ ] **Step 2: Run** `pnpm --filter @dms/db test`. Expected: FAIL (no database).
-- [ ] **Step 3: Implement** the roles:
+- [x] **Step 2: Run** `pnpm --filter @dms/db test`. Expected: FAIL (no database).
+- [x] **Step 3: Implement** the roles:
   - `dms_owner` owns schema `app`;
   - `dms_app NOSUPERUSER NOBYPASSRLS NOCREATEDB`, with default `SELECT, INSERT, UPDATE, DELETE` on future tables and the timeouts above;
   - `REVOKE ALL ON SCHEMA public FROM PUBLIC`.
 
   `.env.example` holds placeholders only; `scripts/setup.sh` fills real random values into `.env`.
-- [ ] **Step 4: Run** `pnpm dev:up && pnpm --filter @dms/db test`. Expected: PASS.
-- [ ] **Step 5: Commit** `git commit -m "chore: docker dev env with owner/app db roles"`
+- [x] **Step 4: Run** `pnpm dev:up && pnpm --filter @dms/db test`. Expected: PASS.
+- [x] **Step 5: Commit** `git commit -m "chore: docker dev env with owner/app db roles"`
 
 ### Task 3: Shared kernel: config, clock, money, errors, logging
 
