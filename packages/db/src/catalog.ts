@@ -3,7 +3,13 @@
 // Run as the app role: the role checks describe whoever is connected.
 import { sql } from "drizzle-orm";
 import { getTableConfig } from "drizzle-orm/pg-core";
-import { GLOBAL_TABLES, listLocationTables, listTenantTables, ROOT_TABLE } from "./registry";
+import {
+  GLOBAL_TABLE_PRIVILEGES,
+  GLOBAL_TABLES,
+  listLocationTables,
+  listTenantTables,
+  ROOT_TABLE,
+} from "./registry";
 
 type Exec = { execute: (q: ReturnType<typeof sql>) => Promise<{ rows: unknown[] }> };
 
@@ -23,8 +29,10 @@ export type CatalogReport = {
   locationNotRegistered: string[];
   /** Views, materialized views and foreign tables in schema app (they bypass table RLS). */
   forbiddenRelations: string[];
-  /** Privileges or ownership the connected (app) role should not have. */
+  /** Privileges, memberships or ownership the connected (app) role should not have. */
   roleProblems: string[];
+  /** Global tables that look dealer-scoped (FK to a tenant table, or a *dealer* column). */
+  globalTableProblems: string[];
 };
 
 /** The predicate as Postgres stores it (pg_policies.qual / with_check). */
@@ -107,6 +115,7 @@ export async function checkCatalog(db: Exec): Promise<CatalogReport> {
       .map((r) => r.name),
     forbiddenRelations: rels.filter((r) => KIND[r.kind]).map((r) => `${r.name} (${KIND[r.kind]})`),
     roleProblems: await roleProblems(db),
+    globalTableProblems: await globalTableProblems(db, new Set(tenant.map((t) => t.name))),
   };
 }
 
@@ -114,7 +123,7 @@ async function roleProblems(db: Exec): Promise<string[]> {
   const problems: string[] = [];
   const [role] = (
     await db.execute(sql`
-      select rolsuper, rolbypassrls, rolcreatedb, rolcreaterole,
+      select rolsuper, rolbypassrls, rolcreatedb, rolcreaterole, rolreplication,
         has_database_privilege(current_database(), 'CREATE') as db_create,
         has_database_privilege(current_database(), 'TEMP') as db_temp
       from pg_roles where rolname = current_user`)
@@ -123,6 +132,7 @@ async function roleProblems(db: Exec): Promise<string[]> {
     rolbypassrls: boolean;
     rolcreatedb: boolean;
     rolcreaterole: boolean;
+    rolreplication: boolean;
     db_create: boolean;
     db_temp: boolean;
   }[];
@@ -151,6 +161,51 @@ async function roleProblems(db: Exec): Promise<string[]> {
   ).rows as { n: number }[];
   if ((owned?.n ?? 0) > 0) problems.push(`owns ${owned?.n} objects`);
 
+  // Membership in any role (e.g. dms_owner) would allow SET ROLE around RLS.
+  const memberOf = (
+    await db.execute(sql`
+      select r.rolname as name from pg_auth_members m join pg_roles r on r.oid = m.roleid
+      where m.member = (select oid from pg_roles where rolname = current_user)`)
+  ).rows as { name: string }[];
+  for (const m of memberOf) problems.push(`member of role ${m.name}`);
+
+  // TRUNCATE ignores RLS; TRIGGER and REFERENCES are never needed by the app.
+  const tablePrivs = (
+    await db.execute(sql`
+      select c.relname as name,
+        has_table_privilege(c.oid, 'TRUNCATE') as truncate,
+        has_table_privilege(c.oid, 'TRIGGER') as trigger,
+        has_table_privilege(c.oid, 'REFERENCES') as refs,
+        has_table_privilege(c.oid, 'UPDATE') as upd,
+        has_table_privilege(c.oid, 'DELETE') as del,
+        has_table_privilege(c.oid, 'INSERT') as ins
+      from pg_class c join pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = 'app' and c.relkind in ('r', 'p')`)
+  ).rows as {
+    name: string;
+    truncate: boolean;
+    trigger: boolean;
+    refs: boolean;
+    upd: boolean;
+    del: boolean;
+    ins: boolean;
+  }[];
+  for (const t of tablePrivs) {
+    if (t.truncate) problems.push(`TRUNCATE on app.${t.name}`);
+    if (t.trigger) problems.push(`TRIGGER on app.${t.name}`);
+    if (t.refs) problems.push(`REFERENCES on app.${t.name}`);
+    const allowed = (GLOBAL_TABLE_PRIVILEGES as Record<string, readonly string[]>)[t.name];
+    if (allowed) {
+      for (const [priv, has] of [
+        ["UPDATE", t.upd],
+        ["DELETE", t.del],
+        ["INSERT", t.ins],
+      ] as const) {
+        if (has && !allowed.includes(priv)) problems.push(`${priv} on global table app.${t.name}`);
+      }
+    }
+  }
+
   const definers = (
     await db.execute(sql`
       select p.proname as name from pg_proc p join pg_namespace n on n.oid = p.pronamespace
@@ -159,6 +214,32 @@ async function roleProblems(db: Exec): Promise<string[]> {
   for (const d of definers) {
     if (!SECURITY_DEFINER_ALLOWLIST.includes(d.name))
       problems.push(`SECURITY DEFINER app.${d.name}`);
+  }
+  return problems;
+}
+
+/** A global table must not reference dealers or tenant tables, nor carry a dealer column. */
+async function globalTableProblems(db: Exec, tenantTables: Set<string>): Promise<string[]> {
+  const problems: string[] = [];
+  const fks = (
+    await db.execute(sql`
+      select src.relname as "from", dst.relname as "to"
+      from pg_constraint k
+      join pg_class src on src.oid = k.conrelid
+      join pg_class dst on dst.oid = k.confrelid
+      join pg_namespace n on n.oid = src.relnamespace
+      where k.contype = 'f' and n.nspname = 'app'`)
+  ).rows as { from: string; to: string }[];
+  const cols = (
+    await db.execute(sql`
+      select table_name as "table", column_name as "column" from information_schema.columns
+      where table_schema = 'app' and column_name like '%dealer%'`)
+  ).rows as { table: string; column: string }[];
+  for (const g of GLOBAL_TABLES) {
+    for (const fk of fks) {
+      if (fk.from === g && tenantTables.has(fk.to)) problems.push(`${g} references ${fk.to}`);
+    }
+    for (const c of cols) if (c.table === g) problems.push(`${g} has column ${c.column}`);
   }
   return problems;
 }

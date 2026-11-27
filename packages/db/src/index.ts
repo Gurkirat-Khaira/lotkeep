@@ -2,6 +2,7 @@
 export { type CatalogReport, checkCatalog, SECURITY_DEFINER_ALLOWLIST } from "./catalog";
 export { DbError, toDbError } from "./errors";
 export {
+  GLOBAL_TABLE_PRIVILEGES,
   GLOBAL_TABLES,
   listLocationTables,
   listTenantTables,

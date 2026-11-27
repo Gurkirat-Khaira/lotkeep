@@ -41,6 +41,14 @@ async function contextFor(dealerId: string): Promise<{ locationId: string; ctx: 
   return { locationId, ctx };
 }
 
+/** Whether the app role holds a table privilege (append-only tables lack UPDATE/DELETE). */
+async function granted(t: PgTable, privilege: "INSERT" | "UPDATE" | "DELETE"): Promise<boolean> {
+  const r = await appDb.execute(
+    sql`select has_table_privilege(${`app.${nameOf(t)}`}, ${privilege}) as ok`,
+  );
+  return (r.rows[0] as { ok: boolean }).ok;
+}
+
 async function rejection(p: Promise<unknown>): Promise<unknown> {
   try {
     await p;
@@ -94,17 +102,27 @@ describe("dealer leak suite", () => {
         expect((empty.rows[0] as { n: number }).n).toBe(0);
       });
 
-      it("update and delete targeting B affect 0 rows", async () => {
-        const upd = await withDealer(A, (tx) =>
+      it("update and delete targeting B affect 0 rows (or are not granted at all)", async () => {
+        const upd = withDealer(A, (tx) =>
           tx.execute(
             sql`update ${qualified(table)} set dealer_id = dealer_id where dealer_id = ${B}`,
           ),
         );
-        expect(upd.rowCount).toBe(0);
-        const del = await withDealer(A, (tx) =>
+        const del = withDealer(A, (tx) =>
           tx.execute(sql`delete from ${qualified(table)} where dealer_id = ${B}`),
         );
-        expect(del.rowCount).toBe(0);
+        for (const [op, run] of [
+          ["UPDATE", upd],
+          ["DELETE", del],
+        ] as const) {
+          if (await granted(table, op)) {
+            expect((await run).rowCount, op).toBe(0);
+          } else {
+            const e = await rejection(run); // append-only tables: denied outright, not by RLS
+            expect((e as DbError).sqlState, op).toBe("42501");
+            expect((e as DbError).rlsViolation, op).toBe(false);
+          }
+        }
         const stillThere = await asOwner(B, (tx) =>
           tx.execute(sql`select count(*)::int as n from ${qualified(table)}`),
         );
@@ -112,6 +130,7 @@ describe("dealer leak suite", () => {
       });
 
       it("insert of a B row under A is rejected by RLS", async () => {
+        expect(await granted(table, "INSERT")).toBe(true); // every tenant table accepts inserts
         const b = contexts.get(B);
         if (!b) throw new Error("context missing");
         // B's real context, so RLS is the only thing wrong with this row.
@@ -119,17 +138,18 @@ describe("dealer leak suite", () => {
           withDealer(A, (tx) => tx.insert(table).values(sample(B, b.locationId, b.ctx) as never)),
         );
         expect(e).toBeInstanceOf(DbError);
-        expect((e as DbError).sqlState).toBe("42501");
+        expect((e as DbError).rlsViolation).toBe(true);
       });
 
-      it("a row cannot be moved from A to B", async () => {
+      it("a row cannot be moved from A to B (RLS, not a missing grant)", async () => {
+        if (!(await granted(table, "UPDATE"))) return; // append-only: nothing can be moved
         const e = await rejection(
           withDealer(A, (tx) =>
             tx.execute(sql`update ${qualified(table)} set dealer_id = ${B} where dealer_id = ${A}`),
           ),
         );
         expect(e).toBeInstanceOf(DbError);
-        expect((e as DbError).sqlState).toBe("42501");
+        expect((e as DbError).rlsViolation).toBe(true);
       });
     });
   }
@@ -154,13 +174,13 @@ describe("dealer leak suite", () => {
           tx.execute(sql`insert into "app"."dealers" (id, legal_name) values (${newId()}, 'X')`),
         ),
       );
-      expect((ins as DbError).sqlState).toBe("42501");
+      expect((ins as DbError).rlsViolation).toBe(true);
       const move = await rejection(
         withDealer(A, (tx) =>
           tx.execute(sql`update "app"."dealers" set id = ${newId()} where id = ${A}`),
         ),
       );
-      expect((move as DbError).sqlState).toBe("42501");
+      expect((move as DbError).rlsViolation).toBe(true);
     });
   });
 });
@@ -192,6 +212,10 @@ describe("catalog checks", () => {
 
   it("the app role has no privileges beyond its tables in schema app", async () => {
     expect((await checkCatalog(appDb)).roleProblems).toEqual([]);
+  });
+
+  it("global tables do not reference dealers or tenant tables", async () => {
+    expect((await checkCatalog(appDb)).globalTableProblems).toEqual([]);
   });
 
   it("global tables have no dealer_id", async () => {
@@ -233,26 +257,39 @@ describe("catalog checks", () => {
         "zz_leak_probe: expected 1 policy, found 2",
       );
     } finally {
-      await ownerDb.execute(sql`drop table app.zz_leak_probe`);
+      await ownerDb.execute(sql`drop table if exists app.zz_leak_probe`);
     }
   });
 
   it("the checks catch a wrong predicate and a materialized view (self-test)", async () => {
-    await ownerDb.execute(sql`create table app.zz_pred_probe (dealer_id uuid not null)`);
-    await ownerDb.execute(sql`alter table app.zz_pred_probe enable row level security`);
-    await ownerDb.execute(sql`alter table app.zz_pred_probe force row level security`);
-    await ownerDb.execute(
-      sql.raw(`create policy zz_loose on app.zz_pred_probe
-      using (dealer_id = NULLIF(current_setting('app.dealer_id', true), '')::uuid OR true)`),
-    );
-    await ownerDb.execute(sql`create materialized view app.zz_mv as select 1 as x`);
     try {
+      await ownerDb.execute(sql`create table app.zz_pred_probe (dealer_id uuid not null)`);
+      await ownerDb.execute(sql`alter table app.zz_pred_probe enable row level security`);
+      await ownerDb.execute(sql`alter table app.zz_pred_probe force row level security`);
+      await ownerDb.execute(
+        sql.raw(`create policy zz_loose on app.zz_pred_probe
+          using (dealer_id = NULLIF(current_setting('app.dealer_id', true), '')::uuid OR true)`),
+      );
+      await ownerDb.execute(sql`create materialized view app.zz_mv as select 1 as x`);
       const report = await checkCatalog(appDb);
       expect(report.badPolicies.some((p) => p.startsWith("zz_pred_probe: "))).toBe(true);
       expect(report.forbiddenRelations).toContain("zz_mv (materialized view)");
     } finally {
-      await ownerDb.execute(sql`drop materialized view app.zz_mv`);
-      await ownerDb.execute(sql`drop table app.zz_pred_probe`);
+      await ownerDb.execute(sql`drop materialized view if exists app.zz_mv`);
+      await ownerDb.execute(sql`drop table if exists app.zz_pred_probe`);
+    }
+  });
+
+  it("the checks catch dangerous table grants (self-test)", async () => {
+    try {
+      await ownerDb.execute(sql`grant truncate on app.locations to dms_app`);
+      await ownerDb.execute(sql`grant update on app.users to dms_app`);
+      const report = await checkCatalog(appDb);
+      expect(report.roleProblems).toContain("TRUNCATE on app.locations");
+      expect(report.roleProblems).toContain("UPDATE on global table app.users");
+    } finally {
+      await ownerDb.execute(sql`revoke truncate on app.locations from dms_app`);
+      await ownerDb.execute(sql`revoke update on app.users from dms_app`);
     }
   });
 });

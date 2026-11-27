@@ -24,6 +24,11 @@ export const GLOBAL_TABLES = [
   "users", // one login can belong to several dealers; UPDATE/DELETE revoked from dms_app (0002)
 ] as const;
 
+/** What dms_app may do on each global table (checked by checkCatalog). */
+export const GLOBAL_TABLE_PRIVILEGES: Record<(typeof GLOBAL_TABLES)[number], readonly string[]> = {
+  users: ["SELECT", "INSERT"],
+};
+
 /** The tenant root: RLS on its own `id`, checked separately by the leak suite. */
 export const ROOT_TABLE = "dealers";
 
@@ -57,7 +62,15 @@ export function registerLocationTable(table: PgTable, sample: Sample): void {
 }
 
 /** Registered tenant tables in registration order (parents before children). */
-export const listTenantTables = (): readonly TenantTableEntry[] => entries;
+export function listTenantTables(): readonly TenantTableEntry[] {
+  // An empty list would make every suite pass while checking nothing.
+  if (entries.length === 0) {
+    throw new Error("tenant table registry is empty: import from @dms/db, not its registry module");
+  }
+  return entries;
+}
 
 export const listLocationTables = (): PgTable[] =>
-  entries.filter((e) => e.location).map((e) => e.table);
+  listTenantTables()
+    .filter((e) => e.location)
+    .map((e) => e.table);

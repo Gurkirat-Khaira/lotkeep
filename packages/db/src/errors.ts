@@ -22,6 +22,7 @@ const DESCRIPTIONS: Record<string, string> = {
 
 type PgErrorLike = {
   code?: unknown;
+  message?: unknown;
   constraint?: unknown;
   table?: unknown;
   column?: unknown;
@@ -33,6 +34,8 @@ const str = (v: unknown) => (typeof v === "string" && v.length > 0 ? v : undefin
 export class DbError extends Error {
   override readonly name = "DbError";
   readonly sqlState: string;
+  /** True only when Postgres rejected a row because of a row-level security policy. */
+  readonly rlsViolation: boolean;
   readonly constraint?: string;
   readonly table?: string;
   readonly column?: string;
@@ -53,6 +56,11 @@ export class DbError extends Error {
       `database error ${sqlState}: ${DESCRIPTIONS[sqlState] ?? "error"}${where ? ` (${where})` : ""}`,
     );
     this.sqlState = sqlState;
+    // Postgres' fixed prefix for RLS rejections; the rest of its message is not kept.
+    this.rlsViolation =
+      sqlState === "42501" &&
+      typeof src.message === "string" &&
+      src.message.startsWith("new row violates row-level security policy");
     if (constraint) this.constraint = constraint;
     if (table) this.table = table;
     if (column) this.column = column;
@@ -63,6 +71,7 @@ export class DbError extends Error {
       name: this.name,
       message: this.message,
       sqlState: this.sqlState,
+      rlsViolation: this.rlsViolation,
       constraint: this.constraint,
       table: this.table,
       column: this.column,
