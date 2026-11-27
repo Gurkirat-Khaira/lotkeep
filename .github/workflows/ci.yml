@@ -34,6 +34,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
+      - name: Migrations match the schema (no drift)
+        run: pnpm --filter @dms/db db:check
       # Throwaway random secrets for this run only, then Postgres + MinIO for the DB tests.
       - name: Start local services
         run: scripts/gen-env.sh && pnpm dev:up

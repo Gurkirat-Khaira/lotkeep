@@ -21,7 +21,8 @@
     "dev:down": "scripts/dev.sh down",
     "dev:reset": "scripts/dev.sh reset",
     "db:migrate": "pnpm --filter @dms/db db:migrate",
-    "db:studio": "pnpm --filter @dms/db db:studio"
+    "db:studio": "pnpm --filter @dms/db db:studio",
+    "db:generate": "pnpm --filter @dms/db db:generate"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.9",

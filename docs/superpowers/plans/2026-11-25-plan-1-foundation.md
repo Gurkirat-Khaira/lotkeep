@@ -263,7 +263,7 @@ it("postgres is not exposed beyond localhost", () => { expect(composePorts("post
   - `normalizeSuite(raw: string): string`: `"OFC 4"`, `"#4"`, `"Ste 4"`, `"Suite 4"`, `"Unit 4"` → `"4"`.
 - Migration workflow: edit Drizzle schema → `pnpm db:generate` → append the `tenantRlsSql(...)` output to the generated SQL → `pnpm db:migrate`. CI runs `drizzle-kit check` (no drift).
 
-- [ ] **Step 1: Write failing tests** (seed dealers A and B with one location and one membership each, as owner)
+- [x] **Step 1: Write failing tests** (seed dealers A and B with one location and one membership each, as owner)
 ```ts
 it("dealer A sees only A locations", async () => {
   const rows = await withDealer(A, (tx) => tx.select().from(locations));
@@ -282,10 +282,10 @@ it("suite variants normalize equal", () => {
   expect(new Set(["OFC 4", "#4", "Ste 4", "Suite 4", "Unit 4"].map(normalizeSuite))).toEqual(new Set(["4"]));
 });
 ```
-- [ ] **Step 2: Run** `pnpm --filter @dms/db test rls-leak`. Expected: FAIL.
-- [ ] **Step 3: Implement** the schema, the migration (as `dms_owner`), `tenantRlsSql`, `withDealer` (app pool) and `normalizeSuite`, plus the per-worker test databases (see Testing setup).
-- [ ] **Step 4: Run**. Expected: PASS.
-- [ ] **Step 5: Commit** `git commit -m "feat(db): dealers, locations, memberships with forced RLS"`
+- [x] **Step 2: Run** `pnpm --filter @dms/db test rls-leak`. Expected: FAIL.
+- [x] **Step 3: Implement** the schema, the migration (as `dms_owner`), `tenantRlsSql`, `withDealer` (app pool) and `normalizeSuite`, plus the per-worker test databases (see Testing setup).
+- [x] **Step 4: Run**. Expected: PASS.
+- [x] **Step 5: Commit** `git commit -m "feat(db): dealers, locations, memberships with forced RLS"`
 
 ### Task 5: Automatic dealer and location leak suites
 
