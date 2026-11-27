@@ -1,0 +1,12 @@
+{
+  "name": "@dms/scripts",
+  "version": "0.0.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run --exclude '**/*.slow.test.ts'",
+    "test:slow": "vitest run --passWithNoTests .slow.test.",
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

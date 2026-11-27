@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["status", "name", "shortName", "slug", "tagline", "github", "colors", "logo"],
+  "properties": {
+    "status": { "enum": ["placeholder", "final"] },
+    "name": { "type": "string", "minLength": 2, "maxLength": 40 },
+    "shortName": { "type": "string", "maxLength": 12 },
+    "slug": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,38}$" },
+    "tagline": { "type": "string", "maxLength": 90 },
+    "github": { "type": "object", "required": ["owner", "repo"] },
+    "colors": {
+      "type": "object",
+      "required": ["primary", "primaryForeground", "accent", "ink", "paper"],
+      "additionalProperties": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+    },
+    "logo": { "type": "object", "required": ["mark", "markMono", "wordmark", "wordmarkDark", "favicon"] }
+  }
+}

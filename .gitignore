@@ -1,0 +1,32 @@
+# Dependencies and build output
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# Test reports
+playwright-report/
+test-results/
+blob-report/
+
+# Secrets: never commit. Only the placeholder template is tracked.
+.env
+.env.*
+!.env.example
+*.env
+
+# Local backups (Task 15) may contain database dumps
+backups/
+
+# Personal Claude Code files
+CLAUDE.local.md
+.claude/settings.local.json
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

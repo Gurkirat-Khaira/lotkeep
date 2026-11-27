@@ -1,0 +1,18 @@
+{
+  "name": "Lotkeep",
+  "short_name": "Lotkeep",
+  "description": "Inventory, deals, compliance and records for small used car dealers. Free to self-host.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#0E7C66",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

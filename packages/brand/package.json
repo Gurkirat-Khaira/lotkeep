@@ -1,0 +1,18 @@
+{
+  "name": "@dms/brand",
+  "version": "0.0.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  },
+  "scripts": {
+    "test": "vitest run --exclude '**/*.slow.test.ts'",
+    "test:slow": "vitest run --passWithNoTests .slow.test.",
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "./brand.schema.json",
+  "status": "placeholder",
+  "name": "Lotkeep",
+  "shortName": "Lotkeep",
+  "slug": "lotkeep",
+  "tagline": "Open-source dealer management for independent used car dealers",
+  "description": "Inventory, deals, compliance and records for small used car dealers. Free to self-host.",
+  "owner": "Gurkirat Singh Khaira",
+  "github": { "owner": "Gurkirat-Khaira", "repo": "lotkeep" },
+  "urls": { "website": "", "docs": "", "support": "" },
+  "emails": { "support": "", "security": "" },
+  "colors": {
+    "primary": "#0E7C66",
+    "primaryForeground": "#FFFFFF",
+    "accent": "#F59E0B",
+    "ink": "#0F172A",
+    "paper": "#F8FAFC"
+  },
+  "font": { "family": "Inter", "fallback": "ui-sans-serif, system-ui, sans-serif" },
+  "logo": {
+    "mark": "assets/logo-mark.svg",
+    "markMono": "assets/logo-mark-mono.svg",
+    "wordmark": "assets/logo-wordmark.svg",
+    "wordmarkDark": "assets/logo-wordmark-dark.svg",
+    "favicon": "assets/favicon.svg"
+  }
+}

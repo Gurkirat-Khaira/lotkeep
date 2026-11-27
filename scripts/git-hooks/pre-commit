@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Pre-commit: Biome on staged files, then a gitleaks scan of the staged changes.
+# Installed by scripts/setup.sh (git config core.hooksPath scripts/git-hooks).
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+# 1. Secrets. Never skip silently: a missing or too-old gitleaks stops the commit.
+if ! command -v gitleaks >/dev/null 2>&1 || ! gitleaks git --help >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks >= 8.19 is required (the 'gitleaks git' command)." >&2
+  echo "  Install the release binary: https://github.com/gitleaks/gitleaks/releases" >&2
+  echo "  (Ubuntu's apt package is too old.) Then re-run scripts/setup.sh." >&2
+  exit 1
+fi
+gitleaks git --staged --redact --no-banner --config .gitleaks.toml .
+
+# 2. Lint and format check of staged files.
+if [ -x node_modules/.bin/biome ]; then
+  node_modules/.bin/biome check --staged --no-errors-on-unmatched
+else
+  echo "pre-commit: Biome is not installed. Run 'pnpm install' first." >&2
+  exit 1
+fi
