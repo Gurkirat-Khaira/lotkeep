@@ -298,7 +298,7 @@ it("suite variants normalize equal", () => {
   - `registerLocationTable(table: PgTable, sample: …): void` (also registers it as a tenant table);
   - `listLocationTables(): PgTable[]` (used by Task 9's API location suite).
 
-- [ ] **Step 1: Write failing test.** For every registered table:
+- [x] **Step 1: Write failing test.** For every registered table:
   - rows for A and B are inserted as owner;
   - under `withDealer(A)`, select returns only A, and an update or delete targeting B affects 0 rows.
 
@@ -306,10 +306,10 @@ it("suite variants normalize equal", () => {
   - every table in schema `app` with a `dealer_id` column has `relrowsecurity` and `relforcerowsecurity` true;
   - every table with a `location_id` column is registered via `registerLocationTable`;
   - every table in `app` is either registered or listed in `GLOBAL_TABLES` (currently `users` and auth tables).
-- [ ] **Step 2: Run**. Expected: FAIL.
-- [ ] **Step 3: Implement**, and register `locations`, `memberships` and `membership_locations`.
-- [ ] **Step 4: Run**. Expected: PASS.
-- [ ] **Step 5: Commit** `git commit -m "test(db): automatic dealer and location leak suites"`
+- [x] **Step 2: Run**. Expected: FAIL.
+- [x] **Step 3: Implement**, and register `locations`, `memberships` and `membership_locations`.
+- [x] **Step 4: Run**. Expected: PASS.
+- [x] **Step 5: Commit** `git commit -m "test(db): automatic dealer and location leak suites"`
 
 ### Task 6: Field encryption and blind index (`packages/crypto`)
 
