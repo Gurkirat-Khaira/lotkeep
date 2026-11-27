@@ -18,6 +18,7 @@ const DESCRIPTIONS: Record<string, string> = {
   "42501": "insufficient privilege (permission denied or row-level security policy)",
   "57014": "query canceled (statement timeout)",
   "25P03": "idle in transaction timeout",
+  DMS01: "change rejected by the data_keys guard",
 };
 
 type PgErrorLike = {

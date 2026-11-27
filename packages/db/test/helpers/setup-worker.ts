@@ -4,13 +4,13 @@
 import pg from "pg";
 import { afterAll } from "vitest";
 import { closeAppDb, initAppDb } from "../../src/tenant";
-import { ident, TEMPLATE_DB, urlFor, workerDbName } from "./urls";
+import { ident, templateDbName, urlFor, workerDbName } from "./urls";
 
 const name = workerDbName();
 const admin = new pg.Client({ connectionString: urlFor("owner", "dms") });
 await admin.connect();
 try {
-  await admin.query(`create database ${ident(name)} template ${ident(TEMPLATE_DB)}`);
+  await admin.query(`create database ${ident(name)} template ${ident(templateDbName())}`);
   // Database ACLs are not copied from the template.
   await admin.query(`revoke all on database ${ident(name)} from public`);
   await admin.query(`grant connect on database ${ident(name)} to dms_app`);

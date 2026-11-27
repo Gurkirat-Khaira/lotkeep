@@ -3,8 +3,18 @@ import { loadTestEnv } from "./env";
 
 loadTestEnv();
 
-export const TEMPLATE_DB = "dms_test_template";
-export const workerDbName = (): string => `dms_test_${process.env.VITEST_POOL_ID ?? "1"}`;
+// Each package that runs DB tests uses its own prefix, so parallel packages never share or drop
+// each other's databases (ADR 0005). Set by dbTestConfig().
+const prefix = (): string => {
+  const p = process.env.DMS_TEST_DB_PREFIX ?? "db";
+  if (!/^[a-z][a-z0-9]{0,15}$/.test(p)) throw new Error(`bad DMS_TEST_DB_PREFIX ${p}`);
+  return p;
+};
+export const templateDbName = (): string => `dms_test_${prefix()}_template`;
+export const workerDbName = (): string =>
+  `dms_test_${prefix()}_${process.env.VITEST_POOL_ID ?? "1"}`;
+/** LIKE pattern for this package's test databases (underscores escaped). */
+export const ownDatabasesPattern = (): string => `dms\\_test\\_${prefix()}\\_%`;
 
 function required(name: "DATABASE_URL_APP" | "DATABASE_URL_OWNER"): string {
   const v = process.env[name];
