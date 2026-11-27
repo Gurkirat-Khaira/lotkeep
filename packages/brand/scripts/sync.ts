@@ -1,7 +1,7 @@
 // pnpm brand:sync — regenerates every brand-derived file from brand/ (run after editing brand/).
 // Outputs: apps/web/public/{favicon.svg,manifest.webmanifest}, packages/ui/src/brand.css and the
 // generated header block in README.md. PNG icons are added in Plan 1 Task 13 (Playwright).
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type Brand, brand } from "../src/index";
@@ -65,13 +65,22 @@ export function withHeader(readme: string, header: string): string {
   return re.test(readme) ? readme.replace(re, header) : `${header}\n\n${readme}`;
 }
 
+/** Reads a file, or "" if it does not exist (no exists-then-read race). */
+function readOrEmpty(path: string): string {
+  try {
+    return readFileSync(path, "utf8");
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === "ENOENT") return "";
+    throw e;
+  }
+}
+
 function main() {
   copyFileSync(join(ROOT, "brand", brand.logo.favicon), out("apps/web/public/favicon.svg"));
   writeFileSync(out("apps/web/public/manifest.webmanifest"), manifest(brand));
   writeFileSync(out("packages/ui/src/brand.css"), brandCss(brand));
   const readmePath = join(ROOT, "README.md");
-  const readme = existsSync(readmePath) ? readFileSync(readmePath, "utf8") : "";
-  writeFileSync(readmePath, withHeader(readme, readmeHeader(brand)));
+  writeFileSync(readmePath, withHeader(readOrEmpty(readmePath), readmeHeader(brand)));
   console.warn("brand:sync wrote favicon, manifest, brand.css and the README header");
 }
 

@@ -36,6 +36,10 @@ with `tsx`/Vitest, so there is no build step between packages.
 **Supply chain:**
 - Dependencies are pinned exactly and installed with `--frozen-lockfile` in CI.
 - GitHub Actions are pinned to full commit SHAs, with the tag in a comment (Dependabot updates both).
+- `minimumReleaseAge: 1440` (owner decision, 2026-11-27): pnpm refuses any version published less
+  than 24 hours ago, so a hijacked release has a day to be caught before we can install it.
+  Dependabot's 7-day cooldown sits on top of this. To take an urgent security fix sooner, add it to
+  `minimumReleaseAgeExclude` in `pnpm-workspace.yaml` with a comment and the date.
 - pnpm 12 blocks dependency build scripts by default. `pnpm-workspace.yaml` → `allowBuilds` lists each decision; `esbuild: false`, because esbuild ships its binary as an optional dependency and needs no postinstall.
 
 ## Consequences
