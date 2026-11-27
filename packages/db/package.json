@@ -4,18 +4,27 @@
   "private": true,
   "license": "AGPL-3.0-only",
   "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "test": "vitest run --exclude '**/*.slow.test.ts'",
     "test:slow": "vitest run --passWithNoTests .slow.test.",
     "typecheck": "tsc -p tsconfig.json",
-    "db:migrate": "echo 'db:migrate: no migrations yet (Drizzle config arrives in Plan 1 Task 4)'",
-    "db:studio": "echo 'db:studio: available from Plan 1 Task 4 (drizzle-kit studio)'"
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:generate": "drizzle-kit generate",
+    "db:check": "drizzle-kit check"
   },
   "dependencies": {
+    "@dms/config": "workspace:*",
+    "@dms/core": "workspace:*",
+    "drizzle-orm": "0.45.4",
     "pg": "8.23.1"
   },
   "devDependencies": {
     "@types/pg": "8.23.1",
+    "drizzle-kit": "0.31.11",
     "yaml": "2.9.1"
   }
 }
