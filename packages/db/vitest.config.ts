@@ -1,9 +1,4 @@
 import { defineConfig } from "vitest/config";
+import { dbTestConfig } from "./test/helpers/vitest";
 
-export default defineConfig({
-  test: {
-    globalSetup: ["./test/helpers/global-setup.ts"],
-    setupFiles: ["./test/helpers/setup-worker.ts"],
-    hookTimeout: 60_000,
-  },
-});
+export default defineConfig({ test: { ...dbTestConfig("db") } });

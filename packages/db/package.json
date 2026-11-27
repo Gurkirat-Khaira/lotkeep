@@ -5,7 +5,9 @@
   "license": "AGPL-3.0-only",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./testing": "./test/helpers/index.ts",
+    "./testing/vitest": "./test/helpers/vitest.ts"
   },
   "scripts": {
     "test": "vitest run --exclude '**/*.slow.test.ts'",

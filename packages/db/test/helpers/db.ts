@@ -23,3 +23,21 @@ export function asOwner<T>(dealerId: string, fn: (tx: AppTx) => Promise<T>): Pro
 
 /** An app-role transaction scoped to one dealer (same as withDealer). */
 export const asApp = withDealer;
+
+/** A second, independent app-role pool on the worker database (for concurrency tests). */
+export function openAppDb() {
+  const pool = new pg.Pool({ connectionString: urlFor("app", workerDbName()), max: 2 });
+  return { db: drizzle(pool, { schema }), close: () => pool.end() };
+}
+
+/** Like withDealer, but on a given app-role database handle. */
+export function inDealer<T>(
+  db: ReturnType<typeof openAppDb>["db"],
+  dealerId: string,
+  fn: (tx: AppTx) => Promise<T>,
+): Promise<T> {
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`select set_config('app.dealer_id', ${dealerId}, true)`);
+    return fn(tx as unknown as AppTx);
+  });
+}

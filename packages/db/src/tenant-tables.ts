@@ -2,7 +2,7 @@
 // synthetic sample row. See /new-tenant-table.
 import { newId } from "@dms/core";
 import { registerLocationTable, registerTenantTable } from "./registry";
-import { locations, membershipLocations, memberships } from "./schema";
+import { dataKeys, locations, membershipLocations, memberships } from "./schema";
 
 registerTenantTable(locations, (dealerId) => ({
   dealerId,
@@ -26,4 +26,13 @@ registerLocationTable(membershipLocations, (dealerId, locationId, ctx) => ({
   dealerId,
   membershipId: ctx.ref(memberships).id,
   locationId,
+}));
+
+registerTenantTable(dataKeys, (dealerId) => ({
+  dealerId,
+  id: newId(),
+  scope: "customer",
+  subjectId: newId(),
+  keyVersion: 1,
+  wrappedKey: Buffer.from("not-a-real-wrapped-key"),
 }));

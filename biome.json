@@ -11,7 +11,8 @@
       "!**/pnpm-lock.yaml",
       "!apps/web/public",
       "!packages/ui/src/brand.css",
-      "!**/*.md"
+      "!**/*.md",
+      "!packages/db/migrations/meta"
     ]
   },
   "formatter": {
