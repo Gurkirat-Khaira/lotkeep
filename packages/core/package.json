@@ -7,6 +7,10 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "dependencies": {
+    "pino": "10.4.0",
+    "uuid": "14.0.3"
+  },
   "scripts": {
     "test": "vitest run --exclude '**/*.slow.test.ts'",
     "test:slow": "vitest run --passWithNoTests .slow.test.",
