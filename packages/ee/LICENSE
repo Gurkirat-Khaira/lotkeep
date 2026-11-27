@@ -1,0 +1,74 @@
+DRAFT — NOT YET REVIEWED BY AN ATTORNEY. This text will be replaced by an
+attorney-reviewed version before the public launch. Until then it states the
+licensor's intent and is the license under which this folder is offered.
+
+Commercial License (packages/ee)
+SPDX identifier used in source files: LicenseRef-DMS-Commercial
+
+Copyright (c) 2026 Gurkirat Singh Khaira. All rights reserved.
+
+1. Scope
+
+This license applies to every file in the `packages/ee/` directory of this
+repository and to any file whose header carries the identifier
+`LicenseRef-DMS-Commercial` (together, the "Commercial Software"). It has
+applied to the Commercial Software from its first commit. The Commercial
+Software has never been, and is not, licensed under the GNU Affero General
+Public License that covers the rest of this repository.
+
+2. Production use requires a valid license key
+
+You may use the Commercial Software in production only while you hold a valid
+license key issued by the licensor for the deployment, and only within the
+features, locations and term that the key grants. A license key is valid when
+its signature verifies against the licensor's published public key, it has not
+expired, and it was issued for your dealer or installation.
+
+3. Launch promotion
+
+The licensor may publish a free promotion license key. The promotion key is a
+valid license key under section 2 until the expiry date published with it. No
+payment, payment card or automatic conversion to a paid plan is required to
+use it. The licensor will announce the end of the promotion, and any change to
+which features are free, publicly at least 90 days in advance (repository
+notice and in-app notice).
+
+4. Development and testing
+
+Without a license key you may copy, modify and run the Commercial Software for
+development, testing and evaluation, provided you do not use it to process
+real customer data or real dealer business.
+
+5. After a key ends
+
+When a license key or the promotion ends, the Commercial Software stops
+allowing new or changed data in paid features. Data you created with paid
+features stays readable and exportable. Loan payment posting for in-house
+financing (BHPH) loans written while a valid key (including the promotion key)
+was in force stays available for the life of those loans.
+
+6. Restrictions
+
+Except as allowed above, you may not: (a) sell, sublicense, or distribute the
+Commercial Software or modified versions of it; (b) remove, bypass or disable
+the license-key check or any feature gate; or (c) remove this license or the
+copyright notices.
+
+7. Contributions
+
+Contributions to the Commercial Software are accepted only under the
+Contributor License Agreement in `CLA.md` at the repository root.
+
+8. Third-party components
+
+Third-party components used by the Commercial Software are licensed under
+their own terms.
+
+9. No warranty; limitation of liability
+
+THE COMMERCIAL SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE LICENSOR BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE COMMERCIAL SOFTWARE OR ITS USE. NOTHING IN THE COMMERCIAL
+SOFTWARE IS LEGAL ADVICE (see NOTICE-NOT-LEGAL-ADVICE.md).

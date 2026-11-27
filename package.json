@@ -1,0 +1,29 @@
+{
+  "name": "dms",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "packageManager": "pnpm@12.23.0",
+  "engines": {
+    "node": ">=22 <23"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:slow": "turbo run test:slow",
+    "test:e2e": "echo 'test:e2e: no E2E tests yet (added in Plan 1 Task 13)'",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "turbo run typecheck",
+    "verify": "pnpm lint && pnpm typecheck && pnpm test",
+    "brand:sync": "tsx packages/brand/scripts/sync.ts && pnpm --filter @dms/scripts test repo-hygiene"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.9",
+    "@types/node": "22.20.7",
+    "tsx": "4.23.15",
+    "turbo": "2.11.13",
+    "typescript": "6.0.3",
+    "vitest": "5.1.2"
+  }
+}

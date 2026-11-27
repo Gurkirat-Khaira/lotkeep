@@ -1,0 +1,33 @@
+name: Feature request
+description: Suggest an improvement or a new capability.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never paste real customer data.** For a compliance rule change, include a citation to the official source (statute, regulation or agency page) and its date.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Who is affected (owner, F&I, sales, auditor) and how?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: citation
+    attributes:
+      label: Legal source (for rule changes)
+      description: Citation and date. Rule values are never accepted without one.
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: This request contains no real personal data and no secrets.
+          required: true

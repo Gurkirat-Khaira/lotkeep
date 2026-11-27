@@ -1,0 +1,17 @@
+title = "dms gitleaks config"
+
+# Start from gitleaks' built-in rules.
+[extend]
+useDefault = true
+
+# Brand SVG path data and synthetic test fixtures produce high-entropy false positives.
+# Keep this list short; never allowlist source code or config.
+[[allowlists]]
+description = "brand SVGs and synthetic test fixtures"
+# Only the generic high-entropy rule is silenced here. Private-key, cloud-token and every other
+# rule still fire inside fixtures and SVGs.
+targetRules = ["generic-api-key"]
+paths = [
+  '''^brand/assets/[^/]+\.svg$''',
+  '''(^|/)test/fixtures/''',
+]
